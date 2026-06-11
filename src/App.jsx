@@ -832,6 +832,46 @@ export default function App() {
   const setText = (id, val) => setAnswers(prev => ({ ...prev, [id]: val }));
   const setYN = (id, val) => setAnswers(prev => ({ ...prev, [id]: val }));
 
+  const handleSubmit = async () => {
+    const AIRTABLE_TOKEN = "patF38YxEH3sMPusn.514993aafa2e09468ef19469676bac7c2de3f366e775b9a07091bf389525f7a1";
+    const BASE_ID = "appWChDaRSjcYInj4";
+    const TABLE_ID = "tbl9Kdd3Th32FItyU";
+
+    const fields = {
+      "고객명": params.name || "",
+      "예약일시": params.date || "",
+      "서비스": params.service || "",
+      "방문목적": (answers["occasion"] || []).join(", "),
+      "메이크업키워드": (answers["mood_word"] || []).join(", "),
+      "사진영상느낌": answers["vibe"] || "",
+      "퍼스널컬러": (answers["personal_color"] || []).join(", "),
+      "립블러셔색감": (answers["color_pref"] || []).join(", "),
+      "피부타입": (answers["skin"] || []).join(", "),
+      "피부고민": answers["concern"] || "",
+      "알레르기": answers["allergy"] === "yes" ? (answers["allergy_detail"] || "있음") : "없음",
+      "얼굴포인트": (answers["focus"] || []).join(", "),
+      "셀카보정부위": (answers["filter"] || []).join(", "),
+      "피하고싶은메이크업": (answers["no_style"] || []).join(", "),
+      "선호결과": (answers["result"] || []).join(", "),
+      "자유작성": answers["free"] || "",
+      "언어": lang,
+    };
+
+    try {
+      await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${AIRTABLE_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fields }),
+      });
+    } catch (e) {
+      console.error("Airtable 저장 실패:", e);
+    }
+    setSubmitted(true);
+  };
+
   return (
     <>
       <style>{styles}</style>
@@ -1024,7 +1064,7 @@ export default function App() {
                 </div>
               ))}
 
-              <button className="submit-btn" onClick={() => setSubmitted(true)}>
+              <button className="submit-btn" onClick={handleSubmit}>
                 {c.submit}
               </button>
 
