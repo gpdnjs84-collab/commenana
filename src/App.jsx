@@ -833,7 +833,7 @@ export default function App() {
   const setYN = (id, val) => setAnswers(prev => ({ ...prev, [id]: val }));
 
   const handleSubmit = async () => {
-    const AIRTABLE_TOKEN = "patF38YxEH3sMPusn.514993aafa2e09468ef19469676bac7c2de3f366e775b9a07091bf389525f7a1";
+    const AIRTABLE_TOKEN = "patLNl2jHjLlNP7uz.8ec6aadaeb3fb9b7ce66f6b7bc39e52407e52833c800bc5feb5e2ea6435259de";
     const BASE_ID = "appWChDaRSjcYInj4";
     const TABLE_ID = "tbl9Kdd3Th32FItyU";
 
@@ -858,7 +858,7 @@ export default function App() {
     };
 
     try {
-      await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
+      const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${AIRTABLE_TOKEN}`,
@@ -866,8 +866,14 @@ export default function App() {
         },
         body: JSON.stringify({ fields }),
       });
+      const data = await res.json();
+      if (!res.ok) {
+        alert("에러: " + JSON.stringify(data));
+        return;
+      }
     } catch (e) {
-      console.error("Airtable 저장 실패:", e);
+      alert("저장 실패: " + e.message);
+      return;
     }
     setSubmitted(true);
   };
