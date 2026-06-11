@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400&display=swap');
@@ -789,6 +789,16 @@ export default function App() {
   const [answers, setAnswers] = useState({});
   const [uploads, setUploads] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [params, setParams] = useState({ name: "", date: "", service: "메이크업" });
+
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    setParams({
+      name: p.get("name") || "",
+      date: p.get("date") || "",
+      service: p.get("service") || "메이크업"
+    });
+  }, []);
 
   const handleUpload = (id, files) => {
     const fileArr = Array.from(files);
@@ -849,17 +859,17 @@ export default function App() {
               </div>
 
               <div className="reservation-box">
-                <div className="res-item">
+                  <div className="res-item">
                   <div className="res-label">{c.resLabels.name}</div>
-                  <div className="res-value" style={{ color: "#c5bfb8" }}>—</div>
+                  <div className="res-value" style={{ color: params.name ? "#1a1a1a" : "#c5bfb8" }}>{params.name ? `${params.name} 고객님` : "—"}</div>
                 </div>
                 <div className="res-item">
                   <div className="res-label">{c.resLabels.date}</div>
-                  <div className="res-value" style={{ color: "#c5bfb8" }}>—</div>
+                  <div className="res-value" style={{ color: params.date ? "#1a1a1a" : "#c5bfb8" }}>{params.date || "—"}</div>
                 </div>
                 <div className="res-item">
                   <div className="res-label">{c.resLabels.service}</div>
-                  <div className="res-value">메이크업</div>
+                  <div className="res-value">{params.service}</div>
                 </div>
               </div>
 
@@ -1026,4 +1036,3 @@ export default function App() {
     </>
   );
 }
-
