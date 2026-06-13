@@ -886,23 +886,11 @@ export default function App() {
         },
         body: JSON.stringify({ fields }),
       });
-      const data = await res.json();
       if (!res.ok) {
-        console.error("Airtable 에러:", data);
+        console.error("Airtable 에러");
       }
     } catch (e) {
-      console.error("저장 실패:", e.message);
-    }
-
-    // PDF 생성 및 이메일 발송
-    try {
-      await fetch("/api/generate-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submissionData),
-      });
-    } catch (e) {
-      console.error("PDF 생성 실패:", e);
+      console.error("저장 실패");
     }
 
     setSubmitted(true);
