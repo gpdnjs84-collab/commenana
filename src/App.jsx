@@ -888,12 +888,10 @@ export default function App() {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert("에러: " + JSON.stringify(data));
-        return;
+        console.error("Airtable 에러:", data);
       }
     } catch (e) {
-      alert("저장 실패: " + e.message);
-      return;
+      console.error("저장 실패:", e.message);
     }
 
     // PDF 생성 및 이메일 발송
