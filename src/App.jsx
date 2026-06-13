@@ -863,6 +863,29 @@ export default function App() {
       },
       body: JSON.stringify({ fields }),
     }).catch(() => {});
+
+    fetch("/api/generate-pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: params.name || "",
+        date: params.date || "",
+        service: params.service || "",
+        occasion: (answers["occasion"] || []).join(", "),
+        mood_word: (answers["mood_word"] || []).join(", "),
+        vibe: answers["vibe"] || "",
+        personal_color: (answers["personal_color"] || []).join(", "),
+        color_pref: (answers["color_pref"] || []).join(", "),
+        skin: (answers["skin"] || []).join(", "),
+        concern: answers["concern"] || "",
+        allergy: answers["allergy"] === "yes" ? (answers["allergy_detail"] || "있음") : "없음",
+        focus: (answers["focus"] || []).join(", "),
+        filter: (answers["filter"] || []).join(", "),
+        no_style: (answers["no_style"] || []).join(", "),
+        result: (answers["result"] || []).join(", "),
+        free: answers["free"] || "",
+      }),
+    }).catch(() => {});
   };
 
   return (
