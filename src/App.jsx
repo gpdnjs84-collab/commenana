@@ -832,7 +832,7 @@ export default function App() {
   const setText = (id, val) => setAnswers(prev => ({ ...prev, [id]: val }));
   const setYN = (id, val) => setAnswers(prev => ({ ...prev, [id]: val }));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const AIRTABLE_TOKEN = "patLNl2jHjLlNP7uz.8ec6aadaeb3fb9b7ce66f6b7bc39e52407e52833c800bc5feb5e2ea6435259de";
     const BASE_ID = "appWChDaRSjcYInj4";
     const TABLE_ID = "tbl9Kdd3Th32FItyU";
@@ -857,16 +857,25 @@ export default function App() {
       "언어": lang,
     };
 
+    try {
+      const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${AIRTABLE_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fields }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert("에러: " + JSON.stringify(data));
+        return;
+      }
+    } catch (e) {
+      alert("저장 실패: " + e.message);
+      return;
+    }
     setSubmitted(true);
-
-    fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${AIRTABLE_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ fields }),
-    }).catch(e => console.error("저장 실패:", e));
   };
 
   return (
