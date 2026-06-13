@@ -832,49 +832,7 @@ export default function App() {
   const setText = (id, val) => setAnswers(prev => ({ ...prev, [id]: val }));
   const setYN = (id, val) => setAnswers(prev => ({ ...prev, [id]: val }));
 
-  const handleSubmit = async () => {
-    const AIRTABLE_TOKEN = "patLNl2jHjLlNP7uz.8ec6aadaeb3fb9b7ce66f6b7bc39e52407e52833c800bc5feb5e2ea6435259de";
-    const BASE_ID = "appWChDaRSjcYInj4";
-    const TABLE_ID = "tbl9Kdd3Th32FItyU";
-
-    const fields = {
-      "고객명": params.name || "",
-      "예약일시": params.date || "",
-      "서비스": params.service || "",
-      "방문목적": (answers["occasion"] || []).join(", "),
-      "메이크업키워드": (answers["mood_word"] || []).join(", "),
-      "사진영상느낌": answers["vibe"] || "",
-      "퍼스널컬러": (answers["personal_color"] || []).join(", "),
-      "립블러셔색감": (answers["color_pref"] || []).join(", "),
-      "피부타입": (answers["skin"] || []).join(", "),
-      "피부고민": answers["concern"] || "",
-      "알레르기": answers["allergy"] === "yes" ? (answers["allergy_detail"] || "있음") : "없음",
-      "얼굴포인트": (answers["focus"] || []).join(", "),
-      "셀카보정부위": (answers["filter"] || []).join(", "),
-      "피하고싶은메이크업": (answers["no_style"] || []).join(", "),
-      "선호결과": (answers["result"] || []).join(", "),
-      "자유작성": answers["free"] || "",
-      "언어": lang,
-    };
-
-    try {
-      const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${AIRTABLE_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ fields }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        alert("에러: " + JSON.stringify(data));
-        return;
-      }
-    } catch (e) {
-      alert("저장 실패: " + e.message);
-      return;
-    }
+  const handleSubmit = () => {
     setSubmitted(true);
   };
 
