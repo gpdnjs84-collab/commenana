@@ -1,101 +1,70 @@
-const PDFDocument = require('pdfkit');
-const nodemailer = require('nodemailer');
+import { Resend } from 'resend';
+
+const resend = new Resend('re_4vKuZCjt_EQ6VaMqk6BAakcKCTeLFH1fG');
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const data = req.body;
+  const d = req.body;
 
-  // PDF 생성
-  const doc = new PDFDocument({ margin: 40, size: 'A4' });
-  const chunks = [];
-  
-  await new Promise((resolve) => {
-    doc.on('data', chunk => chunks.push(chunk));
-    doc.on('end', resolve);
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a;">
+      <h2 style="text-align:center;letter-spacing:0.2em;">COMMENANA</h2>
+      <p style="text-align:center;color:#a89880;font-size:11px;letter-spacing:0.2em;">MAKEUP CONSULTATION</p>
+      <hr style="border:none;border-top:1px solid #e8e4df;margin:16px 0;">
+      
+      <table style="width:100%;font-size:13px;margin-bottom:20px;">
+        <tr>
+          <td><b>고객명</b></td><td>${d.name || '-'}</td>
+          <td><b>예약 일시</b></td><td>${d.date || '-'}</td>
+          <td><b>서비스</b></td><td>${d.service || '-'}</td>
+        </tr>
+      </table>
+      <hr style="border:none;border-top:1px solid #e8e4df;margin:16px 0;">
 
-    doc.fontSize(20).font('Helvetica-Bold').text('COMMENANA', { align: 'center' });
-    doc.fontSize(9).font('Helvetica').fillColor('#a89880').text('MAKEUP CONSULTATION', { align: 'center' });
-    doc.moveDown(0.5);
-    doc.moveTo(40, doc.y).lineTo(555, doc.y).strokeColor('#e8e4df').stroke();
-    doc.moveDown(0.5);
+      <h3 style="font-size:13px;color:#a89880;letter-spacing:0.1em;">오늘의 무드</h3>
+      ${d.occasion ? `<p><b style="color:#6b6158;font-size:12px;">방문 목적</b><br>${d.occasion}</p>` : ''}
+      ${d.mood_word ? `<p><b style="color:#6b6158;font-size:12px;">메이크업 키워드</b><br>${d.mood_word}</p>` : ''}
+      ${d.vibe ? `<p><b style="color:#6b6158;font-size:12px;">사진/영상 느낌</b><br>${d.vibe}</p>` : ''}
 
-    doc.fillColor('#1a1a1a').fontSize(10).font('Helvetica-Bold');
-    doc.text(`고객명: ${data.name || '-'}   예약 일시: ${data.date || '-'}   서비스: ${data.service || '-'}`);
-    doc.moveDown(0.5);
-    doc.moveTo(40, doc.y).lineTo(555, doc.y).strokeColor('#e8e4df').stroke();
-    doc.moveDown(0.8);
+      <hr style="border:none;border-top:1px solid #e8e4df;margin:16px 0;">
+      <h3 style="font-size:13px;color:#a89880;letter-spacing:0.1em;">컬러톤</h3>
+      ${d.personal_color ? `<p><b style="color:#6b6158;font-size:12px;">퍼스널컬러</b><br>${d.personal_color}</p>` : ''}
+      ${d.color_pref ? `<p><b style="color:#6b6158;font-size:12px;">립/블러셔 색감</b><br>${d.color_pref}</p>` : ''}
 
-    const section = (title) => {
-      doc.fontSize(11).font('Helvetica-Bold').fillColor('#1a1a1a').text(title);
-      doc.moveDown(0.3);
-    };
+      <hr style="border:none;border-top:1px solid #e8e4df;margin:16px 0;">
+      <h3 style="font-size:13px;color:#a89880;letter-spacing:0.1em;">피부 & 컨디션</h3>
+      ${d.skin ? `<p><b style="color:#6b6158;font-size:12px;">피부 타입</b><br>${d.skin}</p>` : ''}
+      ${d.concern ? `<p><b style="color:#6b6158;font-size:12px;">피부 고민 & 안 맞는 성분/제품</b><br>${d.concern}</p>` : ''}
+      ${d.allergy ? `<p><b style="color:#6b6158;font-size:12px;">알레르기</b><br>${d.allergy}</p>` : ''}
 
-    const field = (label, value) => {
-      if (!value) return;
-      doc.fontSize(9).font('Helvetica-Bold').fillColor('#6b6158').text(label);
-      doc.fontSize(9).font('Helvetica').fillColor('#1a1a1a').text(value);
-      doc.moveDown(0.4);
-    };
+      <hr style="border:none;border-top:1px solid #e8e4df;margin:16px 0;">
+      <h3 style="font-size:13px;color:#a89880;letter-spacing:0.1em;">나만의 취향 & 포인트</h3>
+      ${d.focus ? `<p><b style="color:#6b6158;font-size:12px;">얼굴 포인트</b><br>${d.focus}</p>` : ''}
+      ${d.filter ? `<p><b style="color:#6b6158;font-size:12px;">셀카 보정 신경 쓰이는 부위</b><br>${d.filter}</p>` : ''}
+      ${d.no_style ? `<p><b style="color:#6b6158;font-size:12px;">피하고 싶은 메이크업</b><br>${d.no_style}</p>` : ''}
+      ${d.result ? `<p><b style="color:#6b6158;font-size:12px;">메이크업 후 선호 결과</b><br>${d.result}</p>` : ''}
 
-    section('오늘의 무드');
-    field('방문 목적', data.occasion);
-    field('메이크업 키워드', data.mood_word);
-    field('사진/영상 느낌', data.vibe);
-    doc.moveDown(0.3);
+      ${d.free ? `<hr style="border:none;border-top:1px solid #e8e4df;margin:16px 0;">
+      <h3 style="font-size:13px;color:#a89880;letter-spacing:0.1em;">자유 작성</h3>
+      <p>${d.free}</p>` : ''}
 
-    section('컬러톤');
-    field('퍼스널컬러', data.personal_color);
-    field('립/블러셔 색감', data.color_pref);
-    doc.moveDown(0.3);
+      <hr style="border:none;border-top:1px solid #e8e4df;margin:16px 0;">
+      <p style="text-align:center;color:#c5bfb8;font-size:11px;letter-spacing:0.1em;">COMMENANA ✦</p>
+    </div>
+  `;
 
-    section('피부 & 컨디션');
-    field('피부 타입', data.skin);
-    field('피부 고민 & 안 맞는 성분/제품', data.concern);
-    field('알레르기', data.allergy);
-    doc.moveDown(0.3);
-
-    section('나만의 취향 & 포인트');
-    field('얼굴 포인트', data.focus);
-    field('셀카 보정 신경 쓰이는 부위', data.filter);
-    field('피하고 싶은 메이크업', data.no_style);
-    field('메이크업 후 선호 결과', data.result);
-    doc.moveDown(0.3);
-
-    if (data.free) {
-      section('자유 작성');
-      doc.fontSize(9).font('Helvetica').fillColor('#1a1a1a').text(data.free);
-    }
-
-    doc.end();
-  });
-
-  const pdfBuffer = Buffer.concat(chunks);
-
-  // 이메일 발송
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'gpdnjs84@gmail.com',
-      pass: 'ppip pief wloe dfju',
-    },
-  });
-
-  await transporter.sendMail({
-    from: 'gpdnjs84@gmail.com',
-    to: 'gpdnjs84@gmail.com',
-    subject: `[COMMENANA] ${data.name || '고객'} 님의 사전 상담지`,
-    text: `${data.name || '고객'} 님이 상담지를 제출하셨습니다.\n예약 일시: ${data.date || '-'}`,
-    attachments: [
-      {
-        filename: `commenana-${data.name || 'consultation'}.pdf`,
-        content: pdfBuffer,
-        contentType: 'application/pdf',
-      },
-    ],
-  });
-
-  res.status(200).json({ success: true });
+  try {
+    await resend.emails.send({
+      from: 'onboarding@resend.dev',
+      to: 'gpdnjs84@gmail.com',
+      subject: `[COMMENANA] ${d.name || '고객'} 님의 사전 상담지`,
+      html,
+    });
+    res.status(200).json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 }
